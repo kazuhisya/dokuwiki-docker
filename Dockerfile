@@ -38,14 +38,11 @@ RUN apk --update add \
         php7-xmlrpc \
         php7-zip \
         php7-zlib \
-        sudo \
         tar && \
         rm -f /var/cache/apk/*
 
 EXPOSE ${PORT}
 RUN echo "date.timezone = '${TZ}'\n" > /etc/php7/conf.d/timezone.ini && \
-    adduser -D -u 1000 mock && \
-    echo "mock ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers && \
     sed -ri \
         -e 's!^(\s*CustomLog)\s+\S+!\1 /proc/self/fd/1!g' \
         -e 's!^(\s*ErrorLog)\s+\S+!\1 /proc/self/fd/2!g' \
@@ -60,10 +57,15 @@ RUN echo "date.timezone = '${TZ}'\n" > /etc/php7/conf.d/timezone.ini && \
         "/etc/php7/php.ini"
 
 RUN curl -OL https://download.dokuwiki.org/src/dokuwiki/${DOKUWIKI_VERSION}.tgz && \
-    mv ${DOKUWIKI_VERSION}.tgz dokuwiki.tgz
+    mv ${DOKUWIKI_VERSION}.tgz dokuwiki.tgz && \
+    mkdir -p /run/apache2 && chmod 777 /run/apache2 && \
+    chgrp -R 0 /var/www/localhost/htdocs && \
+    chmod -R g=u /var/www/localhost/htdocs
 
 COPY src/start.sh /start.sh
 COPY src/dokuwiki.conf /etc/apache2/conf.d/dokuwiki.conf
+
+USER 10001
+
 VOLUME ["/var/www/localhost/htdocs"]
-USER mock
 CMD ["/start.sh"]

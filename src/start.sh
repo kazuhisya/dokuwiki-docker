@@ -1,8 +1,5 @@
 #!/bin/bash -eu
 
-# Adjust dir permission for mock user
-sudo chown -R mock.mock /var/www/localhost/htdocs
-
 if [ -f /var/www/localhost/htdocs/index.php ]; then
     echo "/var/www/localhost/htdocs/* is already exist, skip extract."
 else
@@ -15,6 +12,4 @@ else
 fi
 
 # Start httpd
-sudo mkdir -p /run/apache2
-sudo chown -R mock.mock /run/apache2
 httpd -D FOREGROUND
