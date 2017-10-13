@@ -44,17 +44,20 @@ RUN apk --update add \
 EXPOSE ${PORT}
 RUN echo "date.timezone = '${TZ}'\n" > /etc/php7/conf.d/timezone.ini && \
     sed -ri \
-        -e 's!^(\s*CustomLog)\s+\S+!\1 /proc/self/fd/1!g' \
-        -e 's!^(\s*ErrorLog)\s+\S+!\1 /proc/self/fd/2!g' \
-        -e 's/Listen 80[[:space:]]*$/Listen ${PORT}/g' \
-        -e 's/AllowOverride None/AllowOverride All/g' \
+        -e "s|^(\s*CustomLog)\s+\S+|\1 /proc/self/fd/1|g" \
+        -e "s|^(\s*ErrorLog)\s+\S+|\1 /proc/self/fd/2|g" \
+        -e "s|Listen 80[[:space:]]*$|Listen ${PORT}|g" \
+        -e "s|AllowOverride None|AllowOverride All|g" \
+        -e "s|ServerSignature On|ServerSignature Off|g" \
+        -e "s|ServerTokens OS|ServerTokens Prod|g" \
         "/etc/apache2/httpd.conf" && \
     sed -ri \
-        -e 's|;*date.timezone =.*|date.timezone = ${TZ}|g' \
-        -e 's|;*memory_limit =.*|memory_limit = ${PHP_MEMORY_LIMIT}|g' \
-        -e 's|;*upload_max_filesize =.*|upload_max_filesize = ${PHP_MAX_UPLOAD}|g' \
-        -e 's|;*max_file_uploads =.*|max_file_uploads = ${PHP_MAX_FILE_UPLOAD}|g' \
-        -e 's|;*post_max_size =.*|post_max_size = ${PHP_MAX_POST}|g' \
+        -e "s|;*date.timezone =.*|date.timezone = ${TZ}|g" \
+        -e "s|;*memory_limit =.*|memory_limit = ${PHP_MEMORY_LIMIT}|g" \
+        -e "s|;*upload_max_filesize =.*|upload_max_filesize = ${PHP_MAX_UPLOAD}|g" \
+        -e "s|;*max_file_uploads =.*|max_file_uploads = ${PHP_MAX_FILE_UPLOAD}|g" \
+        -e "s|;*post_max_size =.*|post_max_size = ${PHP_MAX_POST}|g" \
+        -e "s|expose_php = On|expose_php = Off|g" \
         "/etc/php7/php.ini"
 
 RUN curl -OL https://download.dokuwiki.org/src/dokuwiki/${DOKUWIKI_VERSION}.tgz && \
